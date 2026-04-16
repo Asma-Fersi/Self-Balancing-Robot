@@ -25,13 +25,14 @@ float integral = 0, derivative = 0;
 float pidOutput = 0;
 
 float throttle = 0;
+float steering = 0;
 
 // --- TIMING ---
 unsigned long lastTime = 0; 
 const int loopTime = 10;    
 
 // --- FUNCTION PROTOTYPES ---
-void driveMotors(float speedOutput);
+void driveMotors(float leftSide, float rightSide);
 
 void setup() {
   Serial.begin(9600);
@@ -64,7 +65,7 @@ void loop() {
 
     // 2. Safety Kill Switch
     if (abs(currentAngle) > 45) {
-      driveMotors(0);  
+      driveMotors(0, 0);  
       integral = 0;    
       return;          
     }
@@ -72,9 +73,7 @@ void loop() {
     // 3. PID Math
     error = targetAngle + throttle - currentAngle;
     
-    integral = integral + error;
-    if (integral > 255) integral = 255; // Anti-windup
-    if (integral < -255) integral = -255;
+    integral = constrain(integral + error, -255, 255);
 
     derivative = error - previousError;
     
@@ -82,7 +81,10 @@ void loop() {
     previousError = error; 
 
     // 4. Actuation
-    driveMotors(pidOutput);
+    float leftSide = pidOutput + steering;
+    float rightSide = pidOutput - steering;
+
+    driveMotors(leftSide, rightSide);
 
     // 5. Telemetry for Serial Plotter
     Serial.print(currentAngle); 
@@ -91,26 +93,22 @@ void loop() {
   } 
 }
 
-void driveMotors(float speedOutput) {
-  bool forward = (speedOutput > 0);
-  int speed = abs(speedOutput);
+void driveMotors(float leftSide, float rightSide) {
+  // 1. Determine Direction
+  digitalWrite(IN1, leftSide > 0 ? HIGH : LOW);
+  digitalWrite(IN2, leftSide > 0 ? LOW : HIGH);
+  digitalWrite(IN3, rightSide > 0 ? HIGH : LOW);
+  digitalWrite(IN4, rightSide > 0 ? LOW : HIGH);
 
-  // Motor Deadband Compensation
-  if (speed > 0 && speed < 40) speed = 40; 
-  if (speed > 255) speed = 255;
+  // 2. Process Left Speed
+  int leftSpeed = abs(leftSide);
+  if (leftSpeed > 0) leftSpeed = constrain(leftSpeed, 40, 255);
 
-  if (forward) {
-    digitalWrite(IN1, HIGH);
-    digitalWrite(IN2, LOW);
-    digitalWrite(IN3, HIGH);
-    digitalWrite(IN4, LOW);
-  } else {
-    digitalWrite(IN1, LOW);
-    digitalWrite(IN2, HIGH);
-    digitalWrite(IN3, LOW);
-    digitalWrite(IN4, HIGH);
-  }
+  // 3. Process Right Speed
+  int rightSpeed = abs(rightSide);
+  if (rightSpeed > 0) rightSpeed = constrain(rightSpeed, 40, 255);
 
-  analogWrite(ENA, speed);
-  analogWrite(ENB, speed);
+  // 4. Send to Pins
+  analogWrite(ENA, leftSpeed);
+  analogWrite(ENB, rightSpeed);
 }
