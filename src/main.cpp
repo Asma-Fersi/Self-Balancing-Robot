@@ -29,6 +29,7 @@ float steering = 0;
 
 // --- TIMING ---
 unsigned long lastTime = 0; 
+unsigned long lastCommandTime = 0;
 const int loopTime = 10;    
 
 // --- FUNCTION PROTOTYPES ---
@@ -69,6 +70,20 @@ void loop() {
       integral = 0;    
       return;          
     }
+
+    if (Serial.available() > 0) {
+      char command = Serial.read();
+      lastCommandTime = millis();
+
+      if (command == 'w') throttle = 2.0;  // Forward
+      else if (command == 's') throttle = -2.0; // Backward
+      else if (command == 'a') steering = 15.0; // Left
+      else if (command == 'd') steering = -15.0; // Right
+    }
+    if (millis() - lastCommandTime > 150) {
+      throttle = 0;
+      steering = 0;
+  }
 
     // 3. PID Math
     error = targetAngle + throttle - currentAngle;
