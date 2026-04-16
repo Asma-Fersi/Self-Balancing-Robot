@@ -24,6 +24,8 @@ float error = 0, previousError = 0;
 float integral = 0, derivative = 0;
 float pidOutput = 0;
 
+float throttle = 0;
+
 // --- TIMING ---
 unsigned long lastTime = 0; 
 const int loopTime = 10;    
@@ -68,7 +70,7 @@ void loop() {
     }
 
     // 3. PID Math
-    error = targetAngle - currentAngle;
+    error = targetAngle + throttle - currentAngle;
     
     integral = integral + error;
     if (integral > 255) integral = 255; // Anti-windup
