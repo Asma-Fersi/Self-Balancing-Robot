@@ -5,6 +5,8 @@
 // --- SENSOR & PINS ---
 MPU6050 mpu(Wire);
 
+const int LED_PIN = 13;
+
 //left
 const int ENA = 5;  
 const int IN1 = 6;  
@@ -41,17 +43,22 @@ void setup() {
   
   mpu.begin();
 
-  Serial.println("Calibrating... DO NOT MOVE ROBOT!");
-  delay(1000);
-  mpu.calcOffsets(); 
-  Serial.println("Calibration Complete.");
-
   pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
   pinMode(ENB, OUTPUT);
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
+
+  digitalWrite(LED_PIN, LOW);
+
+  Serial.println("Calibrating... DO NOT MOVE ROBOT!");
+  delay(1000);
+  mpu.calcOffsets(); 
+  Serial.println("Calibration Complete.");
+
+  digitalWrite(LED_PIN, HIGH);
 }
 
 void loop() {
@@ -67,7 +74,8 @@ void loop() {
     // 2. Safety Kill Switch
     if (abs(currentAngle) > 45) {
       driveMotors(0, 0);  
-      integral = 0;    
+      integral = 0; 
+      digitalWrite(LED_PIN, (millis() / 100) % 2);   
       return;          
     }
 
