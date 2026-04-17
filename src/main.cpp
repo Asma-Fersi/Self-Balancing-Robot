@@ -15,11 +15,11 @@ const int IN3 = 10;
 const int IN4 = 9; 
 
 // --- PID PARAMETERS ---
-float Kp = 2.0; 
-float Kd = 0;  
-float Ki = 0;  
+float Kp = 1.5; 
+float Kd = -1.2;  
+float Ki = 0.2;  
 
-float targetAngle = 0.0; 
+float targetAngle = -5; 
 float error = 0, previousError = 0;
 float integral = 0, derivative = 0;
 float pidOutput = 0;
@@ -77,6 +77,7 @@ void loop() {
     if (abs(currentAngle) > 45) {
       driveMotors(0, 0);  
       integral = 0; 
+      currentAngle = 0;
       digitalWrite(LED_PIN, (millis() / 100) % 2);   
       return;          
     }
@@ -121,19 +122,19 @@ void loop() {
 void driveMotors(float leftSide, float rightSide) {
   // --- Left Motor ---
   int leftSpeed = abs(leftSide);
-  leftSpeed = constrain(leftSpeed, 10, 255);
+  if (leftSpeed > 0) leftSpeed = constrain(leftSpeed, 80, 255);
 
   if (leftSide > 0) {
-    analogWrite(IN1, leftSpeed); // PWM for speed
-    analogWrite(IN2, 0);      // Direction
+    analogWrite(IN1, leftSpeed);
+    analogWrite(IN2, 0);
   } else {
-    analogWrite(IN1, 0);      // Direction
-    analogWrite(IN2, leftSpeed); // PWM for speedwads
+    analogWrite(IN1, 0);
+    analogWrite(IN2, leftSpeed);
   }
 
   // --- Right Motor ---
   int rightSpeed = abs(rightSide);
-  rightSpeed = constrain(rightSpeed, 10, 255);
+  if (rightSpeed > 0) rightSpeed = constrain(rightSpeed, 80, 255);
 
   if (rightSide > 0) {
     analogWrite(IN3, 0);
