@@ -8,16 +8,16 @@ MPU6050 mpu(Wire);
 const int LED_PIN = 13;
 
 //left  
-const int IN1 = 5;  
-const int IN2 = 6;  
+const int IN1 = 6;  
+const int IN2 = 5;  
 //right
-const int IN3 = 9;  
-const int IN4 = 10; 
+const int IN3 = 10;  
+const int IN4 = 9; 
 
 // --- PID PARAMETERS ---
-float Kp = 15.0; 
-float Kd = 8.0;  
-float Ki = 0.5;  
+float Kp = 2.0; 
+float Kd = 0;  
+float Ki = 0;  
 
 float targetAngle = 0.0; 
 float error = 0, previousError = 0;
@@ -37,6 +37,12 @@ void driveMotors(float leftSide, float rightSide);
 
 void setup() {
   Serial.begin(9600);
+
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+
   Wire.begin();
   
   mpu.begin();
@@ -103,7 +109,7 @@ void loop() {
     float leftSide = pidOutput + steering;
     float rightSide = pidOutput - steering;
 
-    driveMotors(leftSide, rightSide);
+    driveMotors(pidOutput, pidOutput);
 
     // 5. Telemetry for Serial Plotter
     Serial.print(currentAngle); 
@@ -115,25 +121,25 @@ void loop() {
 void driveMotors(float leftSide, float rightSide) {
   // --- Left Motor ---
   int leftSpeed = abs(leftSide);
-  if (leftSpeed > 0) leftSpeed = constrain(leftSpeed, 40, 255);
+  leftSpeed = constrain(leftSpeed, 10, 255);
 
   if (leftSide > 0) {
     analogWrite(IN1, leftSpeed); // PWM for speed
-    digitalWrite(IN2, LOW);      // Direction
+    analogWrite(IN2, 0);      // Direction
   } else {
-    digitalWrite(IN1, LOW);      // Direction
-    analogWrite(IN2, leftSpeed); // PWM for speed
+    analogWrite(IN1, 0);      // Direction
+    analogWrite(IN2, leftSpeed); // PWM for speedwads
   }
 
   // --- Right Motor ---
   int rightSpeed = abs(rightSide);
-  if (rightSpeed > 0) rightSpeed = constrain(rightSpeed, 40, 255);
+  rightSpeed = constrain(rightSpeed, 10, 255);
 
   if (rightSide > 0) {
-    analogWrite(IN3, rightSpeed);
-    digitalWrite(IN4, LOW);
-  } else {
-    digitalWrite(IN3, LOW);
+    analogWrite(IN3, 0);
     analogWrite(IN4, rightSpeed);
+  } else {
+    analogWrite(IN3, rightSpeed);
+    analogWrite(IN4, 0);
   }
 }
