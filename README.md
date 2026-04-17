@@ -21,15 +21,15 @@ The chassis is designed with a high center of gravity to optimize the PID respon
 
 ## 🔌 Hardware Configuration & Pinout
 
-| Component | Pin | Function |
-| :--- | :--- | :--- |
-| **MPU6050 SDA** | A4 | I2C Data |
-| **MPU6050 SCL** | A5 | I2C Clock |
-| **L298N ENA** | 5 | Left Motor PWM (Speed) |
-| **L298N IN1 / IN2** | 6, 7 | Left Motor Direction Control |
-| **L298N ENB** | 9 | Right Motor PWM (Speed) |
-| **L298N IN3 / IN4** | 8, 10 | Right Motor Direction Control |
-| **Status LED** | 13 | Calibration & Fall Alarm Indicator |
+| Component | Arduino Pin | Type | Function |
+| :--- | :--- | :--- | :--- |
+| **MPU6050 (SDA)** | A4 | I2C | Data Line for Orientation |
+| **MPU6050 (SCL)** | A5 | I2C | Clock Line for Orientation |
+| **Left Motor IN1** | D5 | **PWM** | Forward Drive / Speed |
+| **Left Motor IN2** | D6 | **PWM** | Backward Drive / Speed |
+| **Right Motor IN3**| D9 | **PWM** | Forward Drive / Speed |
+| **Right Motor IN4**| D10| **PWM** | Backward Drive / Speed |
+| **Status LED** | D13 | Digital | Calibration/System Status |
 
 ## 🚀 How to Run
 1.  **Environment:** Open in VS Code with the PlatformIO extension.

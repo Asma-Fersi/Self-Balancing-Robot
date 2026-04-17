@@ -7,13 +7,11 @@ MPU6050 mpu(Wire);
 
 const int LED_PIN = 13;
 
-//left
-const int ENA = 5;  
-const int IN1 = 6;  
-const int IN2 = 7;  
+//left  
+const int IN1 = 5;  
+const int IN2 = 6;  
 //right
-const int ENB = 9;  
-const int IN3 = 8;  
+const int IN3 = 9;  
 const int IN4 = 10; 
 
 // --- PID PARAMETERS ---
@@ -43,10 +41,8 @@ void setup() {
   
   mpu.begin();
 
-  pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
-  pinMode(ENB, OUTPUT);
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
@@ -117,21 +113,27 @@ void loop() {
 }
 
 void driveMotors(float leftSide, float rightSide) {
-  // 1. Determine Direction
-  digitalWrite(IN1, leftSide > 0 ? HIGH : LOW);
-  digitalWrite(IN2, leftSide > 0 ? LOW : HIGH);
-  digitalWrite(IN3, rightSide > 0 ? HIGH : LOW);
-  digitalWrite(IN4, rightSide > 0 ? LOW : HIGH);
-
-  // 2. Process Left Speed
+  // --- Left Motor ---
   int leftSpeed = abs(leftSide);
   if (leftSpeed > 0) leftSpeed = constrain(leftSpeed, 40, 255);
 
-  // 3. Process Right Speed
+  if (leftSide > 0) {
+    analogWrite(IN1, leftSpeed); // PWM for speed
+    digitalWrite(IN2, LOW);      // Direction
+  } else {
+    digitalWrite(IN1, LOW);      // Direction
+    analogWrite(IN2, leftSpeed); // PWM for speed
+  }
+
+  // --- Right Motor ---
   int rightSpeed = abs(rightSide);
   if (rightSpeed > 0) rightSpeed = constrain(rightSpeed, 40, 255);
 
-  // 4. Send to Pins
-  analogWrite(ENA, leftSpeed);
-  analogWrite(ENB, rightSpeed);
+  if (rightSide > 0) {
+    analogWrite(IN3, rightSpeed);
+    digitalWrite(IN4, LOW);
+  } else {
+    digitalWrite(IN3, LOW);
+    analogWrite(IN4, rightSpeed);
+  }
 }
